@@ -1,0 +1,13 @@
+Witten by Jean-Francois Doyon.
+
+Contributions from:
+
+Manel Clos
+Tom MacWright
+Dane Springmeyer
+Carsten Klein
+
+Futher development efforts from (09-03-2016):
+
+Xiaoyi Hong (UESTC, Chengdu, P.R.China 611731)
+Shengli Pan (UESTC, Chengdu, P.R.China 611731)
