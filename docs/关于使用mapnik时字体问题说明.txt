@@ -1,0 +1,5 @@
+字体问题：
+https://github.com/mapnik/mapnik/wiki/UsingCustomFonts
+ 查看已经有的'face_name'   python -c "from mapnik import FontEngine as e;print '\n'.join(e.instance().face_names())"
+ 
+ 如有需求，请自行安装相应字体
