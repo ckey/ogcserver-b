@@ -1,21 +1,36 @@
 #!/usr/bin/env python
 
 import os
+#os模块包含普遍的操作系统功能。
 import sys
+#sys模块包含了与Python解释器和它的环境有关的函数。
 import socket
+#提供低层网络接口（每个 BSD API）
 from os import path
+#os.path 模块包含了各种处理长文件名(路径名)的函数.
+#？以下说法对吗？待查
+#导入modules，import与from...import的不同之处在于，简单说：
+# 如果你想在程序中用argv代表sys.argv，
+# 则可使用：from sys import argv
+# 一般说来，应该避免使用from..import而使用import语句，
+# 因为这样可以使你的程序更加易读，也可以避免名称的冲突
 from pkg_resources import *
+#provides an API for Python libraries to access their resource files, and for extensible applications and frameworks to automatically discover plugins.导入全部
 import argparse
+#命令行解释工具
 
 parser = argparse.ArgumentParser(description='Runs the ogcserver as WMS server')
-
+#使用ArgumentParser作为命令行选项的解释器
+#description：当前程序的简要描述，会显示在命令行选项的帮助选项前
 parser.add_argument('mapfile', type=str, help='''
 A XML mapnik stylesheet
 ''')
-
+#add_argument()方法，设置程序可接受的命令行参数
+#指定数据类型为str，help：当前命令行选项的帮助/说明信息
 parser.add_argument('-c', '--config', dest='configfile', help='''
 Path to the config file.
 ''')
+#dest指定参数存储的变量
 parser.add_argument('-b', '--bind', dest='bind_address', help='''
 Bind to address.
 ''')
@@ -24,26 +39,33 @@ Listen on port.
 ''')
 
 args = parser.parse_args()
-
+#取得命令行参数
 sys.path.insert(0,os.path.abspath('.'))
-
+#将模块路径 “当前目录的绝对路径表示”  添加到当前模块扫描的路径首位，优先扫描
 from ogcserver.wsgi import WSGIApp
+#从ogcserver的wsgi模块导入WSGIApp类
 import ogcserver
-
+#导入ogcserver模块
 configfile = args.configfile
 if not configfile:
     configfile = resource_filename(ogcserver.__name__, 'default.conf')
-
+#检查是否有config参数传入，没有就使用 位于ogcserver目录下的default.conf 默认参数
 application = WSGIApp(configfile,args.mapfile)
-
+#创建实例
 if __name__ == '__main__':
+	#判断是否为主程序
     from wsgiref.simple_server import make_server
+    #导入模块 提供简单http服务器接口
     #if os.uname()[0] == 'Darwin':
     #   host = socket.getfqdn() # yourname.local
     #else:
     #   host = '0.0.0.0'
     host = args.bind_address or '0.0.0.0'
+    #如果有输入参数，则赋予host参数值，否则赋予‘0.0.0.0’
     port = args.bind_port or 8000
+    #如果有输入port参数，则port=输入，否则port=8000
     httpd = make_server(host, port, application)
+	#创建WSGI服务
     print "Listening at %s:%s...." % (host,port)
+    #一直响应，直至服务被kill
     httpd.serve_forever()

@@ -1,0 +1,2435 @@
+Help on package mapnik:
+
+NNAAMMEE
+    mapnik - Mapnik Python module.
+
+FFIILLEE
+    /usr/local/lib/python2.7/dist-packages/mapnik/__init__.py
+
+DDEESSCCRRIIPPTTIIOONN
+    Boost Python bindings to the Mapnik C++ shared library.
+    
+    Several things happen when you do:
+    
+        >>> import mapnik
+    
+     1) Mapnik C++ objects are imported via the '__init__.py' from the '_mapnik.so' shared object
+        (_mapnik.pyd on win) which references libmapnik.so (linux), libmapnik.dylib (mac), or
+        mapnik.dll (win32).
+    
+     2) The paths to the input plugins and font directories are imported from the 'paths.py'
+        file which was constructed and installed during SCons installation.
+    
+     3) All available input plugins and TrueType fonts are automatically registered.
+    
+     4) Boost Python metaclass injectors are used in the '__init__.py' to extend several
+        objects adding extra convenience when accessed via Python.
+
+PPAACCKKAAGGEE  CCOONNTTEENNTTSS
+    _mapnik
+    mapnik_settings
+    paths
+    printing
+
+CCLLAASSSSEESS
+    Boost.Python.instance(__builtin__.object)
+        Box2d
+            Envelope
+        Color
+        Coord
+        Feature
+        Geometry
+        Projection
+        SymbolizerBase
+        TextSymbolizer
+    __builtin__.object
+        PythonDatasource
+    __builtin__.type(__builtin__.object)
+        Boost.Python.class
+    
+    BBoooossttPPyytthhoonnMMeettaaccllaassss = class class(__builtin__.type)
+     |  Method resolution order:
+     |      class
+     |      __builtin__.type
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____ddeellaattttrr____(...)
+     |      x.__delattr__('name') <==> del x.name
+     |  
+     |  ____sseettaattttrr____(...)
+     |      x.__setattr__('name', value) <==> x.name = value
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from __builtin__.type:
+     |  
+     |  ____ccaallll____(...)
+     |      x.__call__(...) <==> x(...)
+     |  
+     |  ____eeqq____(...)
+     |      x.__eq__(y) <==> x==y
+     |  
+     |  ____ggee____(...)
+     |      x.__ge__(y) <==> x>=y
+     |  
+     |  ____ggeettaattttrriibbuuttee____(...)
+     |      x.__getattribute__('name') <==> x.name
+     |  
+     |  ____ggtt____(...)
+     |      x.__gt__(y) <==> x>y
+     |  
+     |  ____hhaasshh____(...)
+     |      x.__hash__() <==> hash(x)
+     |  
+     |  ____iinniitt____(...)
+     |      x.__init__(...) initializes x; see help(type(x)) for signature
+     |  
+     |  ____iinnssttaanncceecchheecckk____(...)
+     |      __instancecheck__() -> bool
+     |      check if an object is an instance
+     |  
+     |  ____llee____(...)
+     |      x.__le__(y) <==> x<=y
+     |  
+     |  ____lltt____(...)
+     |      x.__lt__(y) <==> x<y
+     |  
+     |  ____nnee____(...)
+     |      x.__ne__(y) <==> x!=y
+     |  
+     |  ____rreepprr____(...)
+     |      x.__repr__() <==> repr(x)
+     |  
+     |  ____ssuubbccllaasssscchheecckk____(...)
+     |      __subclasscheck__() -> bool
+     |      check if a class is a subclass
+     |  
+     |  ____ssuubbccllaasssseess____(...)
+     |      __subclasses__() -> list of immediate subclasses
+     |  
+     |  mmrroo(...)
+     |      mro() -> list
+     |      return a type's method resolution order
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from __builtin__.type:
+     |  
+     |  ____aabbssttrraaccttmmeetthhooddss____
+     |  
+     |  ____bbaassee____
+     |  
+     |  ____bbaasseess____
+     |  
+     |  ____bbaassiiccssiizzee____
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____ddiiccttooffffsseett____
+     |  
+     |  ____ffllaaggss____
+     |  
+     |  ____iitteemmssiizzee____
+     |  
+     |  ____mmrroo____
+     |  
+     |  ____wweeaakkrreeffooffffsseett____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from __builtin__.type:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of type object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class BBooxx22dd(Boost.Python.instance)
+     |  Represents a spatial envelope (i.e. bounding box).
+     |  
+     |  
+     |  Following operators are defined for Box2d:
+     |  
+     |  Addition:
+     |  e1 + e2 is equvalent to e1.expand_to_include(e2) but yields
+     |  a new envelope instead of modifying e1
+     |  
+     |  Subtraction:
+     |  Currently e1 - e2 returns e1.
+     |  
+     |  Multiplication and division with floats:
+     |  Multiplication and division change the width and height of the envelope
+     |  by the given factor without modifying its center..
+     |  
+     |  That is, e1 * x is equivalent to:
+     |         e1.width(x * e1.width())
+     |         e1.height(x * e1.height()),
+     |  except that a new envelope is created instead of modifying e1.
+     |  
+     |  e1 / x is equivalent to e1 * (1.0/x).
+     |  
+     |  Equality: two envelopes are equal if their corner points are equal.
+     |  
+     |  Method resolution order:
+     |      Box2d
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____aadddd____(...)
+     |      __add__( (Box2d)arg1, (Box2d)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __add__(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ____ddeeeeppccooppyy____(...)
+     |      __deepcopy__( (Box2d)arg1, (dict)arg2) -> Box2d :
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> __deepcopy__(mapnik::box2d<double> {lvalue},boost::python::dict)
+     |  
+     |  ____ddiivv____(...)
+     |      __div__( (Box2d)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __div__(mapnik::box2d<double> {lvalue},float)
+     |  
+     |  ____eeqq____(...)
+     |      __eq__( (Box2d)arg1, (Box2d)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __eq__(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ____ggeettiinniittaarrggss____(...)
+     |      __getinitargs__( (Box2d)arg1) -> tuple :
+     |      
+     |          C++ signature :
+     |              boost::python::tuple __getinitargs__(mapnik::box2d<double>)
+     |  
+     |  ____ggeettiitteemm____(...)
+     |      __getitem__( (Box2d)arg1, (int)arg2) -> float :
+     |      
+     |          C++ signature :
+     |              double __getitem__(mapnik::box2d<double> {lvalue},int)
+     |  
+     |  ____iinniitt____(...)
+     |      __init__( (object)arg1, (float)minx, (float)miny, (float)maxx, (float)maxy) -> None :
+     |          Constructs a new envelope from the coordinates
+     |          of its lower left and upper right corner points.
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,double,double,double,double)
+     |      
+     |      __init__( (object)arg1) -> None :
+     |          Equivalent to Box2d(0, 0, -1, -1).
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*)
+     |      
+     |      __init__( (object)arg1, (Coord)ll, (Coord)ur) -> None :
+     |          Equivalent to Box2d(ll.x, ll.y, ur.x, ur.y).
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,mapnik::coord<double, 2>,mapnik::coord<double, 2>)
+     |  
+     |  ____mmuull____(...)
+     |      __mul__( (Box2d)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __mul__(mapnik::box2d<double> {lvalue},float)
+     |  
+     |  ____nnee____(...)
+     |      __ne__( (Box2d)arg1, (Box2d)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __ne__(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____rreepprr____(self)
+     |  
+     |  ____rrmmuull____(...)
+     |      __rmul__( (Box2d)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __rmul__(mapnik::box2d<double> {lvalue},float)
+     |  
+     |  cceenntteerr(...)
+     |      center( (Box2d)arg1) -> Coord :
+     |          Returns the coordinates of the center of the bounding box.
+     |          
+     |          Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.center()
+     |          Coord(50, 50)
+     |          
+     |      
+     |          C++ signature :
+     |              mapnik::coord<double, 2> center(mapnik::box2d<double> {lvalue})
+     |      
+     |      center( (Box2d)arg1, (float)x, (float)y) -> None :
+     |          Moves the envelope so that the given coordinates become its new center.
+     |          The width and the height are preserved.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.center(60, 60)
+     |          >>> e.center()
+     |          Coord(60.0,60.0)
+     |          >>> (e.width(), e.height())
+     |          (100.0, 100.0)
+     |          >>> e
+     |          Box2d(10.0, 10.0, 110.0, 110.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void center(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      center( (Box2d)arg1, (Coord)Coord) -> None :
+     |          Moves the envelope so that the given coordinates become its new center.
+     |          The width and the height are preserved.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.center(Coord60, 60)
+     |          >>> e.center()
+     |          Coord(60.0,60.0)
+     |          >>> (e.width(), e.height())
+     |          (100.0, 100.0)
+     |          >>> e
+     |          Box2d(10.0, 10.0, 110.0, 110.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void center(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |  
+     |  cclliipp(...)
+     |      clip( (Box2d)arg1, (Box2d)other) -> None :
+     |          Clip the envelope based on the bounds of another envelope.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> c = Box2d(-50, -50, 50, 50)
+     |          >>> e.clip(c)
+     |          >>> e
+     |          Box2d(0.0,0.0,50.0,50.0
+     |          
+     |      
+     |          C++ signature :
+     |              void clip(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ccoonnttaaiinnss(...)
+     |      contains( (Box2d)arg1, (float)x, (float)y) -> bool :
+     |          Returns True iff this envelope contains the point
+     |          given by x and y.
+     |          
+     |      
+     |          C++ signature :
+     |              bool contains(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      contains( (Box2d)arg1, (Coord)p) -> bool :
+     |          Equivalent to contains(p.x, p.y)
+     |          
+     |      
+     |          C++ signature :
+     |              bool contains(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      contains( (Box2d)arg1, (Box2d)other) -> bool :
+     |          Equivalent to:
+     |            contains(other.minx, other.miny) and contains(other.maxx, other.maxy)
+     |          
+     |      
+     |          C++ signature :
+     |              bool contains(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  eexxppaanndd__ttoo__iinncclluuddee(...)
+     |      expand_to_include( (Box2d)arg1, (float)x, (float)y) -> None :
+     |          Expands this envelope to include the point given by x and y.
+     |          
+     |          Example:
+     |          
+     |      
+     |          C++ signature :
+     |              void expand_to_include(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      expand_to_include( (Box2d)arg1, (Coord)p) -> None :
+     |          Equivalent to expand_to_include(p.x, p.y)
+     |          
+     |      
+     |          C++ signature :
+     |              void expand_to_include(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      expand_to_include( (Box2d)arg1, (Box2d)other) -> None :
+     |          Equivalent to:
+     |            expand_to_include(other.minx, other.miny)
+     |            expand_to_include(other.maxx, other.maxy)
+     |          
+     |      
+     |          C++ signature :
+     |              void expand_to_include(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ffoorrwwaarrdd(self, projection)
+     |      Projects the envelope from the geographic space
+     |      into the cartesian space by projecting its corner
+     |      points.
+     |      
+     |      See also:
+     |         Coord.forward(self, projection)
+     |  
+     |  hheeiigghhtt(...)
+     |      height( (Box2d)arg1, (float)new_height) -> None :
+     |          Sets the height to new_height of the envelope preserving its center.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.height(120)
+     |          >>> e.center()
+     |          Coord(50.0,50.0)
+     |          >>> e
+     |          Box2d(0.0, -10.0, 100.0, 110.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void height(mapnik::box2d<double> {lvalue},double)
+     |      
+     |      height( (Box2d)arg1) -> float :
+     |          Returns the height of this envelope.
+     |          
+     |      
+     |          C++ signature :
+     |              double height(mapnik::box2d<double> {lvalue})
+     |  
+     |  iinntteerrsseecctt(...)
+     |      intersect( (Box2d)arg1, (Box2d)other) -> Box2d :
+     |          Returns the overlap of this envelope and the other envelope
+     |          as a new envelope.
+     |          
+     |          Example:
+     |          >>> e1 = Box2d(0, 0, 100, 100)
+     |          >>> e2 = Box2d(50, 50, 150, 150)
+     |          >>> e1.intersect(e2)
+     |          Box2d(50.0, 50.0, 100.0, 100.0)
+     |          
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> intersect(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  iinntteerrsseeccttss(...)
+     |      intersects( (Box2d)arg1, (float)x, (float)y) -> bool :
+     |          Returns True iff this envelope intersects the point
+     |          given by x and y.
+     |          
+     |          Note: For points, intersection is equivalent
+     |          to containment, i.e. the following holds:
+     |             e.contains(x, y) == e.intersects(x, y)
+     |          
+     |      
+     |          C++ signature :
+     |              bool intersects(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      intersects( (Box2d)arg1, (Coord)p) -> bool :
+     |          Equivalent to contains(p.x, p.y)
+     |          
+     |      
+     |          C++ signature :
+     |              bool intersects(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      intersects( (Box2d)arg1, (Box2d)other) -> bool :
+     |          Returns True iff this envelope intersects the other envelope,
+     |          This relationship is symmetric.
+     |          Example:
+     |          >>> e1 = Box2d(0, 0, 100, 100)
+     |          >>> e2 = Box2d(50, 50, 150, 150)
+     |          >>> e1.intersects(e2)
+     |          True
+     |          >>> e1.contains(e2)
+     |          False
+     |          
+     |      
+     |          C++ signature :
+     |              bool intersects(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  iinnvveerrssee(self, projection)
+     |      Projects the envelope from the cartesian space
+     |      into the geographic space by projecting its corner
+     |      points.
+     |      
+     |      See also:
+     |        Coord.inverse(self, projection).
+     |  
+     |  ppaadd(...)
+     |      pad( (Box2d)arg1, (float)padding) -> None :
+     |          Pad the envelope based on a padding value.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.pad(10)
+     |          >>> e
+     |          Box2d(-10.0,-10.0,110.0,110.0
+     |          
+     |      
+     |          C++ signature :
+     |              void pad(mapnik::box2d<double> {lvalue},double)
+     |  
+     |  vvaalliidd(...)
+     |      valid( (Box2d)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool valid(mapnik::box2d<double> {lvalue})
+     |  
+     |  wwiiddtthh(...)
+     |      width( (Box2d)arg1, (float)new_width) -> None :
+     |          Sets the width to new_width of the envelope preserving its center.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.width(120)
+     |          >>> e.center()
+     |          Coord(50.0,50.0)
+     |          >>> e
+     |          Box2d(-10.0, 0.0, 110.0, 100.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void width(mapnik::box2d<double> {lvalue},double)
+     |      
+     |      width( (Box2d)arg1) -> float :
+     |          Returns the width of this envelope.
+     |          
+     |      
+     |          C++ signature :
+     |              double width(mapnik::box2d<double> {lvalue})
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  ffrroomm__ssttrriinngg(...)
+     |      from_string( (str)arg1) -> Box2d :
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> from_string(std::string)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  mmaaxxxx
+     |      X coordinate for the upper right corner
+     |  
+     |  mmaaxxyy
+     |      Y coordinate for the upper right corner
+     |  
+     |  mmiinnxx
+     |      X coordinate for the lower left corner
+     |  
+     |  mmiinnyy
+     |      Y coordinate for the lower left corner
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 48
+     |  
+     |  ____ssaaffee__ffoorr__uunnppiicckklliinngg____ = True
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class CCoolloorr(Boost.Python.instance)
+     |  Method resolution order:
+     |      Color
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____eeqq____(...)
+     |      __eq__( (Color)arg1, (Color)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __eq__(mapnik::color {lvalue},mapnik::color)
+     |  
+     |  ____ggeettiinniittaarrggss____(...)
+     |      __getinitargs__( (Color)arg1) -> tuple :
+     |      
+     |          C++ signature :
+     |              boost::python::tuple __getinitargs__(mapnik::color)
+     |  
+     |  ____iinniitt____(...)
+     |      __init__( (object)arg1, (int)r, (int)g, (int)b, (int)a) -> None :
+     |          Creates a new color from its RGB components
+     |          and an alpha value.
+     |          All values between 0 and 255.
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,int,int,int,int)
+     |      
+     |      __init__( (object)arg1, (int)r, (int)g, (int)b, (int)a, (bool)premultiplied) -> None :
+     |          Creates a new color from its RGB components
+     |          and an alpha value.
+     |          All values between 0 and 255.
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,int,int,int,int,bool)
+     |      
+     |      __init__( (object)arg1, (int)r, (int)g, (int)b) -> None :
+     |          Creates a new color from its RGB components.
+     |          All values between 0 and 255.
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,int,int,int)
+     |      
+     |      __init__( (object)arg1, (int)val) -> None :
+     |          Creates a new color from an unsigned integer.
+     |          All values between 0 and 2^32-1
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,unsigned int)
+     |      
+     |      __init__( (object)arg1, (int)val, (bool)premultiplied) -> None :
+     |          Creates a new color from an unsigned integer.
+     |          All values between 0 and 2^32-1
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,unsigned int,bool)
+     |      
+     |      __init__( (object)arg1, (str)color_string) -> None :
+     |          Creates a new color from its CSS string representation.
+     |          The string may be a CSS color name (e.g. 'blue')
+     |          or a hex color string (e.g. '#0000ff').
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,std::string)
+     |      
+     |      __init__( (object)arg1, (str)color_string, (bool)premultiplied) -> None :
+     |          Creates a new color from its CSS string representation.
+     |          The string may be a CSS color name (e.g. 'blue')
+     |          or a hex color string (e.g. '#0000ff').
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,std::string,bool)
+     |  
+     |  ____nnee____(...)
+     |      __ne__( (Color)arg1, (Color)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __ne__(mapnik::color {lvalue},mapnik::color)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____rreepprr____(self)
+     |  
+     |  ____ssttrr____(...)
+     |      __str__( (Color)arg1) -> str :
+     |      
+     |          C++ signature :
+     |              std::string __str__(mapnik::color {lvalue})
+     |  
+     |  ddeemmuullttiippllyy(...)
+     |      demultiply( (Color)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool demultiply(mapnik::color {lvalue})
+     |  
+     |  ggeett__pprreemmuullttiipplliieedd(...)
+     |      get_premultiplied( (Color)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool get_premultiplied(mapnik::color {lvalue})
+     |  
+     |  ppaacckkeedd(...)
+     |      packed( (Color)arg1) -> int :
+     |      
+     |          C++ signature :
+     |              unsigned int packed(mapnik::color {lvalue})
+     |  
+     |  pprreemmuullttiippllyy(...)
+     |      premultiply( (Color)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool premultiply(mapnik::color {lvalue})
+     |  
+     |  sseett__pprreemmuullttiipplliieedd(...)
+     |      set_premultiplied( (Color)arg1, (bool)arg2) -> None :
+     |      
+     |          C++ signature :
+     |              void set_premultiplied(mapnik::color {lvalue},bool)
+     |  
+     |  ttoo__hheexx__ssttrriinngg(...)
+     |      to_hex_string( (Color)arg1) -> str :
+     |          Returns the hexadecimal representation of this color.
+     |          
+     |          Example:
+     |          >>> c = Color('blue')
+     |          >>> c.to_hex_string()
+     |          '#0000ff'
+     |          
+     |      
+     |          C++ signature :
+     |              std::string to_hex_string(mapnik::color {lvalue})
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  aa
+     |      Gets or sets the alpha component.
+     |      The value is between 0 and 255.
+     |  
+     |  bb
+     |      Gets or sets the blue component.
+     |      The value is between 0 and 255.
+     |  
+     |  gg
+     |      Gets or sets the green component.
+     |      The value is between 0 and 255.
+     |  
+     |  rr
+     |      Gets or sets the red component.
+     |      The value is between 0 and 255.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 24
+     |  
+     |  ____ssaaffee__ffoorr__uunnppiicckklliinngg____ = True
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class CCoooorrdd(Boost.Python.instance)
+     |  Represents a point with two coordinates (either lon/lat or x/y).
+     |  
+     |  Following operators are defined for Coord:
+     |  
+     |  Addition and subtraction of Coord objects:
+     |  
+     |  >>> Coord(10, 10) + Coord(20, 20)
+     |  Coord(30.0, 30.0)
+     |  >>> Coord(10, 10) - Coord(20, 20)
+     |  Coord(-10.0, -10.0)
+     |  
+     |  Addition, subtraction, multiplication and division between
+     |  a Coord and a float:
+     |  
+     |  >>> Coord(10, 10) + 1
+     |  Coord(11.0, 11.0)
+     |  >>> Coord(10, 10) - 1
+     |  Coord(-9.0, -9.0)
+     |  >>> Coord(10, 10) * 2
+     |  Coord(20.0, 20.0)
+     |  >>> Coord(10, 10) / 2
+     |  Coord(5.0, 5.0)
+     |  
+     |  Equality of coords (as pairwise equality of components):
+     |  >>> Coord(10, 10) is Coord(10, 10)
+     |  False
+     |  >>> Coord(10, 10) == Coord(10, 10)
+     |  True
+     |  
+     |  Method resolution order:
+     |      Coord
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____aadddd____(...)
+     |      __add__( (Coord)arg1, (Coord)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __add__(mapnik::coord<double, 2> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      __add__( (Coord)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __add__(mapnik::coord<double, 2> {lvalue},float)
+     |  
+     |  ____ddiivv____(...)
+     |      __div__( (Coord)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __div__(mapnik::coord<double, 2> {lvalue},float)
+     |  
+     |  ____eeqq____(...)
+     |      __eq__( (Coord)arg1, (Coord)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __eq__(mapnik::coord<double, 2> {lvalue},mapnik::coord<double, 2>)
+     |  
+     |  ____ggeettiinniittaarrggss____(...)
+     |      __getinitargs__( (Coord)arg1) -> tuple :
+     |      
+     |          C++ signature :
+     |              boost::python::tuple __getinitargs__(mapnik::coord<double, 2>)
+     |  
+     |  ____iinniitt____(...)
+     |      __init__( (object)arg1, (float)x, (float)y) -> None :
+     |          Constructs a new point with the given coordinates.
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,double,double)
+     |  
+     |  ____mmuull____(...)
+     |      __mul__( (Coord)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __mul__(mapnik::coord<double, 2> {lvalue},float)
+     |  
+     |  ____rraadddd____(...)
+     |      __radd__( (Coord)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __radd__(mapnik::coord<double, 2> {lvalue},float)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____rreepprr____(self)
+     |  
+     |  ____rrmmuull____(...)
+     |      __rmul__( (Coord)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __rmul__(mapnik::coord<double, 2> {lvalue},float)
+     |  
+     |  ____ssuubb____(...)
+     |      __sub__( (Coord)arg1, (Coord)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __sub__(mapnik::coord<double, 2> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      __sub__( (Coord)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __sub__(mapnik::coord<double, 2> {lvalue},float)
+     |  
+     |  ffoorrwwaarrdd(self, projection)
+     |      Projects the point from the geographic coordinate
+     |      space  into the cartesian space. The x component is
+     |      considered to be longitude, the y component the
+     |      latitude.
+     |      
+     |      Returns the easting (x) and northing (y) as a
+     |      coordinate pair.
+     |      
+     |      Example: Project the geographic coordinates of the
+     |               city center of Stuttgart into the local
+     |               map projection (GK Zone 3/DHDN, EPSG 31467)
+     |      >>> p = Projection('+init=epsg:31467')
+     |      >>> Coord(9.1, 48.7).forward(p)
+     |      Coord(3507360.12813,5395719.2749)
+     |  
+     |  iinnvveerrssee(self, projection)
+     |      Projects the point from the cartesian space
+     |      into the geographic space. The x component is
+     |      considered to be the easting, the y component
+     |      to be the northing.
+     |      
+     |      Returns the longitude (x) and latitude (y) as a
+     |      coordinate pair.
+     |      
+     |      Example: Project the cartesian coordinates of the
+     |               city center of Stuttgart in the local
+     |               map projection (GK Zone 3/DHDN, EPSG 31467)
+     |               into geographic coordinates:
+     |      >>> p = Projection('+init=epsg:31467')
+     |      >>> Coord(3507360.12813,5395719.2749).inverse(p)
+     |      Coord(9.1, 48.7)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  xx
+     |      Gets or sets the x/lon coordinate of the point.
+     |  
+     |  yy
+     |      Gets or sets the y/lat coordinate of the point.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 32
+     |  
+     |  ____ssaaffee__ffoorr__uunnppiicckklliinngg____ = True
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class EEnnvveellooppee(Box2d)
+     |  Method resolution order:
+     |      Envelope
+     |      Box2d
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____iinniitt____(self, *args, **kwargs)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from Box2d:
+     |  
+     |  ____aadddd____(...)
+     |      __add__( (Box2d)arg1, (Box2d)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __add__(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ____ddeeeeppccooppyy____(...)
+     |      __deepcopy__( (Box2d)arg1, (dict)arg2) -> Box2d :
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> __deepcopy__(mapnik::box2d<double> {lvalue},boost::python::dict)
+     |  
+     |  ____ddiivv____(...)
+     |      __div__( (Box2d)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __div__(mapnik::box2d<double> {lvalue},float)
+     |  
+     |  ____eeqq____(...)
+     |      __eq__( (Box2d)arg1, (Box2d)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __eq__(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ____ggeettiinniittaarrggss____(...)
+     |      __getinitargs__( (Box2d)arg1) -> tuple :
+     |      
+     |          C++ signature :
+     |              boost::python::tuple __getinitargs__(mapnik::box2d<double>)
+     |  
+     |  ____ggeettiitteemm____(...)
+     |      __getitem__( (Box2d)arg1, (int)arg2) -> float :
+     |      
+     |          C++ signature :
+     |              double __getitem__(mapnik::box2d<double> {lvalue},int)
+     |  
+     |  ____mmuull____(...)
+     |      __mul__( (Box2d)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __mul__(mapnik::box2d<double> {lvalue},float)
+     |  
+     |  ____nnee____(...)
+     |      __ne__( (Box2d)arg1, (Box2d)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __ne__(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____rreepprr____(self)
+     |  
+     |  ____rrmmuull____(...)
+     |      __rmul__( (Box2d)arg1, (float)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __rmul__(mapnik::box2d<double> {lvalue},float)
+     |  
+     |  cceenntteerr(...)
+     |      center( (Box2d)arg1) -> Coord :
+     |          Returns the coordinates of the center of the bounding box.
+     |          
+     |          Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.center()
+     |          Coord(50, 50)
+     |          
+     |      
+     |          C++ signature :
+     |              mapnik::coord<double, 2> center(mapnik::box2d<double> {lvalue})
+     |      
+     |      center( (Box2d)arg1, (float)x, (float)y) -> None :
+     |          Moves the envelope so that the given coordinates become its new center.
+     |          The width and the height are preserved.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.center(60, 60)
+     |          >>> e.center()
+     |          Coord(60.0,60.0)
+     |          >>> (e.width(), e.height())
+     |          (100.0, 100.0)
+     |          >>> e
+     |          Box2d(10.0, 10.0, 110.0, 110.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void center(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      center( (Box2d)arg1, (Coord)Coord) -> None :
+     |          Moves the envelope so that the given coordinates become its new center.
+     |          The width and the height are preserved.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.center(Coord60, 60)
+     |          >>> e.center()
+     |          Coord(60.0,60.0)
+     |          >>> (e.width(), e.height())
+     |          (100.0, 100.0)
+     |          >>> e
+     |          Box2d(10.0, 10.0, 110.0, 110.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void center(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |  
+     |  cclliipp(...)
+     |      clip( (Box2d)arg1, (Box2d)other) -> None :
+     |          Clip the envelope based on the bounds of another envelope.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> c = Box2d(-50, -50, 50, 50)
+     |          >>> e.clip(c)
+     |          >>> e
+     |          Box2d(0.0,0.0,50.0,50.0
+     |          
+     |      
+     |          C++ signature :
+     |              void clip(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ccoonnttaaiinnss(...)
+     |      contains( (Box2d)arg1, (float)x, (float)y) -> bool :
+     |          Returns True iff this envelope contains the point
+     |          given by x and y.
+     |          
+     |      
+     |          C++ signature :
+     |              bool contains(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      contains( (Box2d)arg1, (Coord)p) -> bool :
+     |          Equivalent to contains(p.x, p.y)
+     |          
+     |      
+     |          C++ signature :
+     |              bool contains(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      contains( (Box2d)arg1, (Box2d)other) -> bool :
+     |          Equivalent to:
+     |            contains(other.minx, other.miny) and contains(other.maxx, other.maxy)
+     |          
+     |      
+     |          C++ signature :
+     |              bool contains(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  eexxppaanndd__ttoo__iinncclluuddee(...)
+     |      expand_to_include( (Box2d)arg1, (float)x, (float)y) -> None :
+     |          Expands this envelope to include the point given by x and y.
+     |          
+     |          Example:
+     |          
+     |      
+     |          C++ signature :
+     |              void expand_to_include(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      expand_to_include( (Box2d)arg1, (Coord)p) -> None :
+     |          Equivalent to expand_to_include(p.x, p.y)
+     |          
+     |      
+     |          C++ signature :
+     |              void expand_to_include(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      expand_to_include( (Box2d)arg1, (Box2d)other) -> None :
+     |          Equivalent to:
+     |            expand_to_include(other.minx, other.miny)
+     |            expand_to_include(other.maxx, other.maxy)
+     |          
+     |      
+     |          C++ signature :
+     |              void expand_to_include(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  ffoorrwwaarrdd(self, projection)
+     |      Projects the envelope from the geographic space
+     |      into the cartesian space by projecting its corner
+     |      points.
+     |      
+     |      See also:
+     |         Coord.forward(self, projection)
+     |  
+     |  hheeiigghhtt(...)
+     |      height( (Box2d)arg1, (float)new_height) -> None :
+     |          Sets the height to new_height of the envelope preserving its center.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.height(120)
+     |          >>> e.center()
+     |          Coord(50.0,50.0)
+     |          >>> e
+     |          Box2d(0.0, -10.0, 100.0, 110.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void height(mapnik::box2d<double> {lvalue},double)
+     |      
+     |      height( (Box2d)arg1) -> float :
+     |          Returns the height of this envelope.
+     |          
+     |      
+     |          C++ signature :
+     |              double height(mapnik::box2d<double> {lvalue})
+     |  
+     |  iinntteerrsseecctt(...)
+     |      intersect( (Box2d)arg1, (Box2d)other) -> Box2d :
+     |          Returns the overlap of this envelope and the other envelope
+     |          as a new envelope.
+     |          
+     |          Example:
+     |          >>> e1 = Box2d(0, 0, 100, 100)
+     |          >>> e2 = Box2d(50, 50, 150, 150)
+     |          >>> e1.intersect(e2)
+     |          Box2d(50.0, 50.0, 100.0, 100.0)
+     |          
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> intersect(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  iinntteerrsseeccttss(...)
+     |      intersects( (Box2d)arg1, (float)x, (float)y) -> bool :
+     |          Returns True iff this envelope intersects the point
+     |          given by x and y.
+     |          
+     |          Note: For points, intersection is equivalent
+     |          to containment, i.e. the following holds:
+     |             e.contains(x, y) == e.intersects(x, y)
+     |          
+     |      
+     |          C++ signature :
+     |              bool intersects(mapnik::box2d<double> {lvalue},double,double)
+     |      
+     |      intersects( (Box2d)arg1, (Coord)p) -> bool :
+     |          Equivalent to contains(p.x, p.y)
+     |          
+     |      
+     |          C++ signature :
+     |              bool intersects(mapnik::box2d<double> {lvalue},mapnik::coord<double, 2>)
+     |      
+     |      intersects( (Box2d)arg1, (Box2d)other) -> bool :
+     |          Returns True iff this envelope intersects the other envelope,
+     |          This relationship is symmetric.
+     |          Example:
+     |          >>> e1 = Box2d(0, 0, 100, 100)
+     |          >>> e2 = Box2d(50, 50, 150, 150)
+     |          >>> e1.intersects(e2)
+     |          True
+     |          >>> e1.contains(e2)
+     |          False
+     |          
+     |      
+     |          C++ signature :
+     |              bool intersects(mapnik::box2d<double> {lvalue},mapnik::box2d<double>)
+     |  
+     |  iinnvveerrssee(self, projection)
+     |      Projects the envelope from the cartesian space
+     |      into the geographic space by projecting its corner
+     |      points.
+     |      
+     |      See also:
+     |        Coord.inverse(self, projection).
+     |  
+     |  ppaadd(...)
+     |      pad( (Box2d)arg1, (float)padding) -> None :
+     |          Pad the envelope based on a padding value.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.pad(10)
+     |          >>> e
+     |          Box2d(-10.0,-10.0,110.0,110.0
+     |          
+     |      
+     |          C++ signature :
+     |              void pad(mapnik::box2d<double> {lvalue},double)
+     |  
+     |  vvaalliidd(...)
+     |      valid( (Box2d)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool valid(mapnik::box2d<double> {lvalue})
+     |  
+     |  wwiiddtthh(...)
+     |      width( (Box2d)arg1, (float)new_width) -> None :
+     |          Sets the width to new_width of the envelope preserving its center.
+     |          
+     |           Example:
+     |          >>> e = Box2d(0, 0, 100, 100)
+     |          >>> e.width(120)
+     |          >>> e.center()
+     |          Coord(50.0,50.0)
+     |          >>> e
+     |          Box2d(-10.0, 0.0, 110.0, 100.0)
+     |          
+     |      
+     |          C++ signature :
+     |              void width(mapnik::box2d<double> {lvalue},double)
+     |      
+     |      width( (Box2d)arg1) -> float :
+     |          Returns the width of this envelope.
+     |          
+     |      
+     |          C++ signature :
+     |              double width(mapnik::box2d<double> {lvalue})
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from Box2d:
+     |  
+     |  ffrroomm__ssttrriinngg(...)
+     |      from_string( (str)arg1) -> Box2d :
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> from_string(std::string)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Box2d:
+     |  
+     |  mmaaxxxx
+     |      X coordinate for the upper right corner
+     |  
+     |  mmaaxxyy
+     |      Y coordinate for the upper right corner
+     |  
+     |  mmiinnxx
+     |      X coordinate for the lower left corner
+     |  
+     |  mmiinnyy
+     |      Y coordinate for the lower left corner
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Box2d:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 48
+     |  
+     |  ____ssaaffee__ffoorr__uunnppiicckklliinngg____ = True
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class FFeeaattuurree(Boost.Python.instance)
+     |  Method resolution order:
+     |      Feature
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____ccoonnttaaiinnss____(...)
+     |      __contains__( (Feature)arg1, (str)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              mapnik::value_adl_barrier::value __contains__(mapnik::feature_impl,std::string)
+     |  
+     |  ____ggeettiitteemm____(...)
+     |      __getitem__( (Feature)arg1, (str)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              mapnik::value_adl_barrier::value __getitem__(mapnik::feature_impl,std::string)
+     |      
+     |      __getitem__( (Feature)arg1, (int)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              mapnik::value_adl_barrier::value __getitem__(mapnik::feature_impl,unsigned long)
+     |  
+     |  ____iinniitt____(...)
+     |      __init__( (object)arg1, (Context)arg2, (int)arg3) -> None :
+     |          Default ctor.
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,std::shared_ptr<mapnik::context<std::map<std::string, unsigned long, std::less<std::string>, std::allocator<std::pair<std::string const, unsigned long> > > > >,long)
+     |  
+     |  ____lleenn____(...)
+     |      __len__( (Feature)arg1) -> int :
+     |      
+     |          C++ signature :
+     |              unsigned long __len__(mapnik::feature_impl {lvalue})
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____sseettiitteemm____(...)
+     |      __setitem__( (Feature)arg1, (str)arg2, (object)arg3) -> None :
+     |      
+     |          C++ signature :
+     |              void __setitem__(mapnik::feature_impl {lvalue},std::string,mapnik::value_adl_barrier::value)
+     |  
+     |  ccoonntteexxtt(...)
+     |      context( (Feature)arg1) -> Context :
+     |      
+     |          C++ signature :
+     |              std::shared_ptr<mapnik::context<std::map<std::string, unsigned long, std::less<std::string>, std::allocator<std::pair<std::string const, unsigned long> > > > > context(mapnik::feature_impl {lvalue})
+     |  
+     |  eennvveellooppee(...)
+     |      envelope( (Feature)arg1) -> Box2d :
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> envelope(mapnik::feature_impl {lvalue})
+     |  
+     |  hhaass__kkeeyy(...)
+     |      has_key( (Feature)arg1, (str)arg2) -> bool :
+     |      
+     |          C++ signature :
+     |              bool has_key(mapnik::feature_impl {lvalue},std::string)
+     |  
+     |  iidd(...)
+     |      id( (Feature)arg1) -> int :
+     |      
+     |          C++ signature :
+     |              long id(mapnik::feature_impl {lvalue})
+     |  
+     |  ttoo__ggeeoojjssoonn(...)
+     |      to_geojson( (Feature)arg1) -> str :
+     |      
+     |          C++ signature :
+     |              std::string to_geojson(mapnik::feature_impl)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  ffrroomm__ggeeoojjssoonn(...)
+     |      from_geojson( (str)arg1, (Context)arg2) -> Feature :
+     |      
+     |          C++ signature :
+     |              std::shared_ptr<mapnik::feature_impl> from_geojson(std::string,std::shared_ptr<mapnik::context<std::map<std::string, unsigned long, std::less<std::string>, std::allocator<std::pair<std::string const, unsigned long> > > > >)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  ____ggeeoo__iinntteerrffaaccee____
+     |  
+     |  aattttrriibbuutteess
+     |  
+     |  ggeeoommeettrryy
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 32
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class GGeeoommeettrryy(Boost.Python.instance)
+     |  Method resolution order:
+     |      Geometry
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____ssttrr____(...)
+     |      __str__( (Geometry)arg1) -> str :
+     |      
+     |          C++ signature :
+     |              std::string __str__(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  cceennttrrooiidd(...)
+     |      centroid( (Geometry)arg1) -> Point :
+     |      
+     |          C++ signature :
+     |              mapnik::geometry::point<double> centroid(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  ccoorrrreecctt(...)
+     |      correct( (Geometry)arg1) -> None :
+     |      
+     |          C++ signature :
+     |              void correct(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > > {lvalue})
+     |  
+     |  eennvveellooppee(...)
+     |      envelope( (Geometry)arg1) -> Box2d :
+     |      
+     |          C++ signature :
+     |              mapnik::box2d<double> envelope(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  iiss__eemmppttyy(...)
+     |      is_empty( (Geometry)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool is_empty(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  iiss__ssiimmppllee(...)
+     |      is_simple( (Geometry)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool is_simple(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  iiss__vvaalliidd(...)
+     |      is_valid( (Geometry)arg1) -> bool :
+     |      
+     |          C++ signature :
+     |              bool is_valid(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  ttoo__ggeeoojjssoonn(...)
+     |      to_geojson( (Geometry)arg1) -> str :
+     |      
+     |          C++ signature :
+     |              std::string to_geojson(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  ttoo__wwkkbb(...)
+     |      to_wkb( (Geometry)arg1, (wkbByteOrder)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* to_wkb(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >,mapnik::wkbByteOrder)
+     |  
+     |  ttoo__wwkktt(...)
+     |      to_wkt( (Geometry)arg1) -> str :
+     |      
+     |          C++ signature :
+     |              std::string to_wkt(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  ttyyppee(...)
+     |      type( (Geometry)arg1) -> GeometryType :
+     |      
+     |          C++ signature :
+     |              mapnik::geometry::geometry_types type(mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > >)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods defined here:
+     |  
+     |  ffrroomm__ggeeoojjssoonn(...)
+     |      from_geojson( (str)arg1) -> Geometry :
+     |      
+     |          C++ signature :
+     |              std::shared_ptr<mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > > > from_geojson(std::string)
+     |  
+     |  ffrroomm__wwkkbb(...)
+     |      from_wkb( (str)arg1) -> Geometry :
+     |      
+     |          C++ signature :
+     |              std::shared_ptr<mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > > > from_wkb(std::string)
+     |  
+     |  ffrroomm__wwkktt(...)
+     |      from_wkt( (str)arg1) -> Geometry :
+     |      
+     |          C++ signature :
+     |              std::shared_ptr<mapnik::util::variant<mapnik::geometry::geometry_empty, mapnik::geometry::point<double>, mapnik::geometry::line_string<double>, mapnik::geometry::polygon<double>, mapnik::geometry::multi_point<double>, mapnik::geometry::multi_line_string<double>, mapnik::geometry::multi_polygon<double>, mapnik::util::recursive_wrapper<mapnik::geometry::geometry_collection<double> > > > from_wkt(std::string)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  ____ggeeoo__iinntteerrffaaccee____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinniitt____ = <built-in function __init__>
+     |      Raises an exception
+     |      This class cannot be instantiated from Python
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class PPrroojjeeccttiioonn(Boost.Python.instance)
+     |  Represents a map projection.
+     |  
+     |  Method resolution order:
+     |      Projection
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____ggeettiinniittaarrggss____(...)
+     |      __getinitargs__( (Projection)arg1) -> tuple :
+     |      
+     |          C++ signature :
+     |              boost::python::tuple __getinitargs__(mapnik::projection)
+     |  
+     |  ____iinniitt____(...)
+     |      __init__( (object)arg1, (str)proj4_string) -> None :
+     |          Constructs a new projection from its PROJ.4 string representation.
+     |          
+     |          The constructor will throw a RuntimeError in case the projection
+     |          cannot be initialized.
+     |          
+     |      
+     |          C++ signature :
+     |              void __init__(_object*,std::string)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____rreepprr____(self)
+     |  
+     |  eexxppaannddeedd(...)
+     |      expanded( (Projection)arg1) -> str :
+     |          normalize PROJ.4 definition by expanding +init= syntax
+     |          
+     |      
+     |          C++ signature :
+     |              std::string expanded(mapnik::projection {lvalue})
+     |  
+     |  ffoorrwwaarrdd(self, obj)
+     |      Projects the given object (Box2d or Coord)
+     |      from the geographic space into the cartesian space.
+     |      
+     |      See also:
+     |        Box2d.forward(self, projection),
+     |        Coord.forward(self, projection).
+     |  
+     |  iinnvveerrssee(self, obj)
+     |      Projects the given object (Box2d or Coord)
+     |      from the cartesian space into the geographic space.
+     |      
+     |      See also:
+     |        Box2d.inverse(self, projection),
+     |        Coord.inverse(self, projection).
+     |  
+     |  ppaarraammss(...)
+     |      params( (Projection)arg1) -> str :
+     |          Returns the PROJ.4 string for this projection.
+     |          
+     |      
+     |          C++ signature :
+     |              std::string params(mapnik::projection {lvalue})
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  ggeeooggrraapphhiicc
+     |      This property is True if the projection is a geographic projection
+     |      (i.e. it uses lon/lat coordinates)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 48
+     |  
+     |  ____ssaaffee__ffoorr__uunnppiicckklliinngg____ = True
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class PPyytthhoonnDDaattaassoouurrccee(__builtin__.object)
+     |  A base class for a Python data source.
+     |  
+     |  Optional arguments:
+     |    envelope -- a mapnik.Box2d (minx, miny, maxx, maxy) envelope of the data source, default (-180,-90,180,90)
+     |    geometry_type -- one of the DataGeometryType enumeration values, default Point
+     |    data_type -- one of the DataType enumerations, default Vector
+     |  
+     |  Methods defined here:
+     |  
+     |  ____iinniitt____(self, envelope=None, geometry_type=None, data_type=None)
+     |  
+     |  ffeeaattuurreess(self, query)
+     |      Return an iterable which yields instances of Feature for features within the passed query.
+     |      
+     |      Required arguments:
+     |        query -- a Query instance specifying the region for which features should be returned
+     |  
+     |  ffeeaattuurreess__aatt__ppooiinntt(self, point)
+     |      Rarely uses. Return an iterable which yields instances of Feature for the specified point.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  wwkkbb__ffeeaattuurreess(cls, keys, features) from __builtin__.type
+     |      A convenience function to wrap an iterator yielding pairs of WKB format geometry and dictionaries of
+     |      key-value pairs into mapnik features. Return this from PythonDatasource.features() passing it a sequence of keys
+     |      to appear in the output and an iterator yielding features.
+     |      
+     |      For example. One might have a features() method in a derived class like the following:
+     |      
+     |      def features(self, query):
+     |          # ... create WKB features feat1 and feat2
+     |      
+     |          return mapnik.PythonDatasource.wkb_features(
+     |              keys = ( 'name', 'author' ),
+     |              features = [
+     |                  (feat1, { 'name': 'feat1', 'author': 'alice' }),
+     |                  (feat2, { 'name': 'feat2', 'author': 'bob' }),
+     |              ]
+     |          )
+     |  
+     |  wwkktt__ffeeaattuurreess(cls, keys, features) from __builtin__.type
+     |      A convenience function to wrap an iterator yielding pairs of WKT format geometry and dictionaries of
+     |      key-value pairs into mapnik features. Return this from PythonDatasource.features() passing it a sequence of keys
+     |      to appear in the output and an iterator yielding features.
+     |      
+     |      For example. One might have a features() method in a derived class like the following:
+     |      
+     |      def features(self, query):
+     |          # ... create WKT features feat1 and feat2
+     |      
+     |          return mapnik.PythonDatasource.wkt_features(
+     |              keys = ( 'name', 'author' ),
+     |              features = [
+     |                  (feat1, { 'name': 'feat1', 'author': 'alice' }),
+     |                  (feat2, { 'name': 'feat2', 'author': 'bob' }),
+     |              ]
+     |          )
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  ____ddiicctt____
+     |      dictionary for instance variables (if defined)
+     |  
+     |  ____wweeaakkrreeff____
+     |      list of weak references to the object (if defined)
+    
+    class SSyymmbboolliizzeerrBBaassee(Boost.Python.instance)
+     |  Method resolution order:
+     |      SymbolizerBase
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____eeqq____(...)
+     |      __eq__( (SymbolizerBase)arg1, (SymbolizerBase)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              _object* __eq__(mapnik::symbolizer_base {lvalue},mapnik::symbolizer_base)
+     |  
+     |  ____ggeettaattttrr____(...)
+     |      __getattr__( (SymbolizerBase)arg1, (str)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              boost::python::api::object __getattr__(mapnik::symbolizer_base,std::string)
+     |  
+     |  ____ggeettiitteemm____(...)
+     |      __getitem__( (SymbolizerBase)arg1, (str)arg2) -> object :
+     |      
+     |          C++ signature :
+     |              boost::python::api::object __getitem__(mapnik::symbolizer_base,std::string)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ____sseettaattttrr____(...)
+     |      __setattr__( (SymbolizerBase)arg1, (str)arg2, (NumericWrapper)arg3) -> None :
+     |      
+     |          C++ signature :
+     |              void __setattr__(mapnik::symbolizer_base {lvalue},std::string,mapnik::detail::strict_value)
+     |  
+     |  ____sseettiitteemm____(...)
+     |      __setitem__( (SymbolizerBase)arg1, (str)arg2, (NumericWrapper)arg3) -> None :
+     |      
+     |          C++ signature :
+     |              void __setitem__(mapnik::symbolizer_base {lvalue},std::string,mapnik::detail::strict_value)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  ffiilleennaammee
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinniitt____ = <built-in function __init__>
+     |      Raises an exception
+     |      This class cannot be instantiated from Python
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+    
+    class TTeexxttSSyymmbboolliizzeerr(Boost.Python.instance)
+     |  Method resolution order:
+     |      TextSymbolizer
+     |      Boost.Python.instance
+     |      __builtin__.object
+     |  
+     |  Methods defined here:
+     |  
+     |  ____iinniitt____(...)
+     |      __init__( (object)arg1) -> None :
+     |      
+     |          C++ signature :
+     |              void __init__(_object*)
+     |  
+     |  ____rreedduuccee____ = <unnamed Boost.Python function>(...)
+     |  
+     |  ssyymmbbooll = symbol_for_subcls(self)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  aallllooww__oovveerrllaapp
+     |  
+     |  aavvooiidd__eeddggeess
+     |  
+     |  cchhaarraacctteerr__ssppaacciinngg
+     |  
+     |  ddiissppllaacceemmeenntt
+     |  
+     |  ffaaccee__nnaammee
+     |  
+     |  ffiillll
+     |  
+     |  ffoonnttsseett
+     |  
+     |  hhaalloo__ffiillll
+     |  
+     |  hhaalloo__rraaddiiuuss
+     |  
+     |  hhoorriizzoonnttaall__aalliiggnnmmeenntt
+     |  
+     |  jjuussttiiffyy__aalliiggnnmmeenntt
+     |  
+     |  llaabbeell__ppllaacceemmeenntt
+     |  
+     |  llaabbeell__ppoossiittiioonn__ttoolleerraannccee
+     |  
+     |  llaabbeell__ssppaacciinngg
+     |  
+     |  lliinnee__ssppaacciinngg
+     |  
+     |  mmaaxxiimmuumm__aannggllee__cchhaarr__ddeellttaa
+     |  
+     |  mmiinniimmuumm__ddiissttaannccee
+     |  
+     |  mmiinniimmuumm__ppaaddddiinngg
+     |  
+     |  mmiinniimmuumm__ppaatthh__lleennggtthh
+     |  
+     |  nnaammee
+     |  
+     |  oorriieennttaattiioonn
+     |  
+     |  tteexxtt__ooppaacciittyy
+     |  
+     |  tteexxtt__rraattiioo
+     |  
+     |  tteexxtt__ssiizzee
+     |  
+     |  tteexxtt__ttrraannssffoorrmm
+     |  
+     |  vveerrttiiccaall__aalliiggnnmmeenntt
+     |  
+     |  wwrraapp__bbeeffoorree
+     |  
+     |  wwrraapp__wwiiddtthh
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  ____iinnssttaannccee__ssiizzee____ = 64
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Boost.Python.instance:
+     |  
+     |  ____ddiicctt____
+     |  
+     |  ____wweeaakkrreeff____
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from Boost.Python.instance:
+     |  
+     |  ____nneeww____ = <built-in method __new__ of Boost.Python.class object>
+     |      T.__new__(S, ...) -> a new object with type S, a subtype of T
+
+FFUUNNCCTTIIOONNSS
+    CCSSVV(**keywords)
+        Create a CSV Datasource.
+        
+            Required keyword arguments:
+              file -- path to csv
+        
+            Optional keyword arguments:
+              inline -- inline CSV string (if provided 'file' argument will be ignored and non-needed)
+              base -- path prefix (default None)
+              encoding -- file encoding (default 'utf-8')
+              row_limit -- integer limit of rows to return (default: 0)
+              strict -- throw an error if an invalid row is encountered
+              escape -- The escape character to use for parsing data
+              quote -- The quote character to use for parsing data
+              separator -- The separator character to use for parsing data
+              headers -- A comma separated list of header names that can be set to add headers to data that lacks them
+              filesize_max -- The maximum filesize in MB that will be accepted
+        
+            >>> from mapnik import CSV
+            >>> csv = CSV(file='test.csv')
+        
+            >>> from mapnik import CSV
+            >>> csv = CSV(inline='''wkt,Name
+        "POINT (120.15 48.47)","Winthrop, WA"''')
+        
+            For more information see https://github.com/mapnik/mapnik/wiki/CSV-Plugin
+    
+    CCrreeaatteeDDaattaassoouurrccee(...)
+        CreateDatasource( (dict)arg1) -> Datasource :
+        
+            C++ signature :
+                std::shared_ptr<mapnik::datasource> CreateDatasource(boost::python::dict)
+    
+    DDaattaassoouurrccee(**keywords)
+        Wrapper around CreateDatasource.
+        
+        Create a Mapnik Datasource using a dictionary of parameters.
+        
+        Keywords must include:
+        
+          type='plugin_name' # e.g. type='gdal'
+        
+        See the convenience factory methods of each input plugin for
+        details on additional required keyword arguments.
+    
+    EExxpprreessssiioonn(...)
+        Expression( (str)expr) -> Expression :
+            Expression string
+        
+            C++ signature :
+                std::shared_ptr<mapnik::util::variant<mapnik::value_null, bool, long, double, icu_54::UnicodeString, mapnik::attribute, mapnik::global_attribute, mapnik::geometry_type_attribute, mapnik::util::recursive_wrapper<mapnik::unary_node<mapnik::tags::negate> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::plus> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::minus> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::mult> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::div> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::mod> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::less> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::less_equal> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::greater> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::greater_equal> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::equal_to> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::not_equal_to> >, mapnik::util::recursive_wrapper<mapnik::unary_node<mapnik::tags::logical_not> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::logical_and> >, mapnik::util::recursive_wrapper<mapnik::binary_node<mapnik::tags::logical_or> >, mapnik::util::recursive_wrapper<mapnik::regex_match_node>, mapnik::util::recursive_wrapper<mapnik::regex_replace_node>, mapnik::util::recursive_wrapper<mapnik::unary_function_call>, mapnik::util::recursive_wrapper<mapnik::binary_function_call> > > Expression(std::string)
+    
+    FFiilltteerr(*args, **kwargs)
+    
+    GGddaall(**keywords)
+        Create a GDAL Raster Datasource.
+        
+        Required keyword arguments:
+          file -- path to GDAL supported dataset
+        
+        Optional keyword arguments:
+          base -- path prefix (default None)
+          shared -- boolean, open GdalDataset in shared mode (default: False)
+          bbox -- tuple (minx, miny, maxx, maxy). If specified, overrides the bbox detected by GDAL.
+        
+        >>> from mapnik import Gdal, Layer
+        >>> dataset = Gdal(base='/home/mapnik/data',file='elevation.tif')
+        >>> lyr = Layer('GDAL Layer from TIFF file')
+        >>> lyr.datasource = dataset
+    
+    GGeeooJJSSOONN(**keywords)
+        Create a GeoJSON Datasource.
+        
+        Required keyword arguments:
+          file -- path to json
+        
+        Optional keyword arguments:
+          encoding -- file encoding (default 'utf-8')
+          base -- path prefix (default None)
+        
+        >>> from mapnik import GeoJSON
+        >>> geojson = GeoJSON(file='test.json')
+    
+    MMeemmoorryyDDaattaassoouurrccee(**keywords)
+        Create a Memory Datasource.
+        
+        Optional keyword arguments:
+            (TODO)
+    
+    OOccccii(**keywords)
+        Create a Oracle Spatial (10g) Vector Datasource.
+        
+        Required keyword arguments:
+          user -- database user to connect as
+          password -- password for database user
+          host -- oracle host to connect to (does not refer to SID in tsnames.ora)
+          table -- table name or subselect query
+        
+        Optional keyword arguments:
+          initial_size -- integer size of connection pool (default 1)
+          max_size -- integer max of connection pool (default 10)
+          extent -- manually specified data extent (comma delimited string, default None)
+          estimate_extent -- boolean, direct Oracle to use the faster, less accurate estimate_extent() over extent() (default False)
+          encoding -- file encoding (default 'utf-8')
+          geometry_field -- specify geometry field (default 'GEOLOC')
+          use_spatial_index -- boolean, force the use of the spatial index (default True)
+        
+        >>> from mapnik import Occi, Layer
+        >>> params = dict(host='myoracle',user='scott',password='tiger',table='test')
+        >>> params['estimate_extent'] = False
+        >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
+        >>> oracle = Occi(**params)
+        >>> lyr = Layer('Oracle Spatial Layer')
+        >>> lyr.datasource = oracle
+    
+    OOggrr(**keywords)
+        Create a OGR Vector Datasource.
+        
+        Required keyword arguments:
+          file -- path to OGR supported dataset
+          layer -- name of layer to use within datasource (optional if layer_by_index or layer_by_sql is used)
+        
+        Optional keyword arguments:
+          layer_by_index -- choose layer by index number instead of by layer name or sql.
+          layer_by_sql -- choose layer by sql query number instead of by layer name or index.
+          base -- path prefix (default None)
+          encoding -- file encoding (default 'utf-8')
+        
+        >>> from mapnik import Ogr, Layer
+        >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON')
+        >>> lyr = Layer('OGR Layer from GeoJSON file')
+        >>> lyr.datasource = datasource
+    
+    OOssmm(**keywords)
+        Create a Osm Datasource.
+        
+        Required keyword arguments:
+          file -- path to OSM file
+        
+        Optional keyword arguments:
+          encoding -- file encoding (default 'utf-8')
+          url -- url to fetch data (default None)
+          bbox -- data bounding box for fetching data (default None)
+        
+        >>> from mapnik import Osm, Layer
+        >>> datasource = Osm(file='test.osm')
+        >>> lyr = Layer('Osm Layer')
+        >>> lyr.datasource = datasource
+    
+    PPaatthhEExxpprreessssiioonn(...)
+        PathExpression( (str)expr) -> PathExpression :
+            PathExpression string
+        
+            C++ signature :
+                std::shared_ptr<std::vector<mapnik::util::variant<std::string, mapnik::attribute>, std::allocator<mapnik::util::variant<std::string, mapnik::attribute> > > > PathExpression(std::string)
+    
+    PPggRRaasstteerr(**keywords)
+        Create a PgRaster Datasource.
+        
+        Required keyword arguments:
+          dbname -- database name to connect to
+          table -- table name or subselect query
+        
+          *Note: if using subselects for the 'table' value consider also
+           passing the 'raster_field' and 'srid' and 'extent_from_subquery'
+           options and/or specifying the 'raster_table' option.
+        
+        Optional db connection keyword arguments:
+          user -- database user to connect as (default: see postgres docs)
+          password -- password for database user (default: see postgres docs)
+          host -- portgres hostname (default: see postgres docs)
+          port -- postgres port (default: see postgres docs)
+          initial_size -- integer size of connection pool (default: 1)
+          max_size -- integer max of connection pool (default: 10)
+          persist_connection -- keep connection open (default: True)
+        
+        Optional table-level keyword arguments:
+          extent -- manually specified data extent (comma delimited string, default: None)
+          estimate_extent -- boolean, direct PostGIS to use the faster, less accurate `estimate_extent` over `extent` (default: False)
+          extent_from_subquery -- boolean, direct Mapnik to query Postgis for the extent of the raw 'table' value (default: uses 'geometry_table')
+          raster_table -- specify geometry table to use to look up metadata (default: automatically parsed from 'table' value)
+          raster_field -- specify geometry field to use (default: first entry in raster_columns)
+          srid -- specify srid to use (default: auto-detected from geometry_field)
+          row_limit -- integer limit of rows to return (default: 0)
+          cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
+          use_overviews -- boolean, use overviews when available (default: false)
+          prescale_rasters -- boolean, scale rasters on the db side (default: false)
+          clip_rasters -- boolean, clip rasters on the db side (default: false)
+          band -- integer, if non-zero interprets the given band (1-based offset) as a data raster (default: 0)
+        
+        >>> from mapnik import PgRaster, Layer
+        >>> params = dict(dbname='mapnik',table='osm',user='postgres',password='gis')
+        >>> params['estimate_extent'] = False
+        >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
+        >>> pgraster = PgRaster(**params)
+        >>> lyr = Layer('PgRaster Layer')
+        >>> lyr.datasource = pgraster
+    
+    PPoossttGGIISS(**keywords)
+        Create a PostGIS Datasource.
+        
+        Required keyword arguments:
+          dbname -- database name to connect to
+          table -- table name or subselect query
+        
+          *Note: if using subselects for the 'table' value consider also
+           passing the 'geometry_field' and 'srid' and 'extent_from_subquery'
+           options and/or specifying the 'geometry_table' option.
+        
+        Optional db connection keyword arguments:
+          user -- database user to connect as (default: see postgres docs)
+          password -- password for database user (default: see postgres docs)
+          host -- portgres hostname (default: see postgres docs)
+          port -- postgres port (default: see postgres docs)
+          initial_size -- integer size of connection pool (default: 1)
+          max_size -- integer max of connection pool (default: 10)
+          persist_connection -- keep connection open (default: True)
+        
+        Optional table-level keyword arguments:
+          extent -- manually specified data extent (comma delimited string, default: None)
+          estimate_extent -- boolean, direct PostGIS to use the faster, less accurate `estimate_extent` over `extent` (default: False)
+          extent_from_subquery -- boolean, direct Mapnik to query Postgis for the extent of the raw 'table' value (default: uses 'geometry_table')
+          geometry_table -- specify geometry table to use to look up metadata (default: automatically parsed from 'table' value)
+          geometry_field -- specify geometry field to use (default: first entry in geometry_columns)
+          srid -- specify srid to use (default: auto-detected from geometry_field)
+          row_limit -- integer limit of rows to return (default: 0)
+          cursor_size -- integer size of binary cursor to use (default: 0, no binary cursor is used)
+        
+        >>> from mapnik import PostGIS, Layer
+        >>> params = dict(dbname=env['MAPNIK_NAME'],table='osm',user='postgres',password='gis')
+        >>> params['estimate_extent'] = False
+        >>> params['extent'] = '-20037508,-19929239,20037508,19929239'
+        >>> postgis = PostGIS(**params)
+        >>> lyr = Layer('PostGIS Layer')
+        >>> lyr.datasource = postgis
+    
+    PPyytthhoonn(**keywords)
+        Create a Python Datasource.
+        
+        >>> from mapnik import Python, PythonDatasource
+        >>> datasource = Python('PythonDataSource')
+        >>> lyr = Layer('Python datasource')
+        >>> lyr.datasource = datasource
+    
+    RRaasstteerr(**keywords)
+        Create a Raster (Tiff) Datasource.
+        
+        Required keyword arguments:
+          file -- path to stripped or tiled tiff
+          lox -- lowest (min) x/longitude of tiff extent
+          loy -- lowest (min) y/latitude of tiff extent
+          hix -- highest (max) x/longitude of tiff extent
+          hiy -- highest (max) y/latitude of tiff extent
+        
+        Hint: lox,loy,hix,hiy make a Mapnik Box2d
+        
+        Optional keyword arguments:
+          base -- path prefix (default None)
+          multi -- whether the image is in tiles on disk (default False)
+        
+        Multi-tiled keyword arguments:
+          x_width -- virtual image number of tiles in X direction (required)
+          y_width -- virtual image number of tiles in Y direction (required)
+          tile_size -- if an image is in tiles, how large are the tiles (default 256)
+          tile_stride -- if an image is in tiles, what's the increment between rows/cols (default 1)
+        
+        >>> from mapnik import Raster, Layer
+        >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6)
+        >>> lyr = Layer('Tiff Layer')
+        >>> lyr.datasource = raster
+    
+    RRaasstteerrlliittee(**keywords)
+        Create a Rasterlite Datasource.
+        
+        Required keyword arguments:
+          file -- path to Rasterlite database file
+          table -- table name or subselect query
+        
+        Optional keyword arguments:
+          base -- path prefix (default None)
+          extent -- manually specified data extent (comma delimited string, default None)
+        
+        >>> from mapnik import Rasterlite, Layer
+        >>> rasterlite = Rasterlite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239')
+        >>> lyr = Layer('Rasterlite Layer')
+        >>> lyr.datasource = rasterlite
+    
+    SSQQLLiittee(**keywords)
+        Create a SQLite Datasource.
+        
+        Required keyword arguments:
+          file -- path to SQLite database file
+          table -- table name or subselect query
+        
+        Optional keyword arguments:
+          base -- path prefix (default None)
+          encoding -- file encoding (default 'utf-8')
+          extent -- manually specified data extent (comma delimited string, default None)
+          metadata -- name of auxillary table containing record for table with xmin, ymin, xmax, ymax, and f_table_name
+          geometry_field -- name of geometry field (default 'the_geom')
+          key_field -- name of primary key field (default 'OGC_FID')
+          row_offset -- specify a custom integer row offset (default 0)
+          row_limit -- specify a custom integer row limit (default 0)
+          wkb_format -- specify a wkb type of 'spatialite' (default None)
+          use_spatial_index -- boolean, instruct sqlite plugin to use Rtree spatial index (default True)
+        
+        >>> from mapnik import SQLite, Layer
+        >>> sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239')
+        >>> lyr = Layer('SQLite Layer')
+        >>> lyr.datasource = sqlite
+    
+    SShhaappeeffiillee(**keywords)
+        Create a Shapefile Datasource.
+        
+        Required keyword arguments:
+          file -- path to shapefile without extension
+        
+        Optional keyword arguments:
+          base -- path prefix (default None)
+          encoding -- file encoding (default 'utf-8')
+        
+        >>> from mapnik import Shapefile, Layer
+        >>> shp = Shapefile(base='/home/mapnik/data',file='world_borders')
+        >>> lyr = Layer('Shapefile Layer')
+        >>> lyr.datasource = shp
+    
+    bboooottssttrraapp__eennvv()
+        If an optional settings file exists, inherit its
+        environment settings before loading the mapnik library.
+        
+        This feature is intended for customized packages of mapnik.
+        
+        The settings file should be a python file with an 'env' variable
+        that declares a dictionary of key:value pairs to push into the
+        global process environment, if not already set, like:
+        
+            env = {'ICU_DATA':'/usr/local/share/icu/'}
+    
+    cclleeaarr__ccaacchhee(...)
+        clear_cache() -> None :
+            
+            Clear all global caches of markers and mapped memory regions.
+            
+            Usage:
+            >>> from mapnik import clear_cache
+            >>> clear_cache()
+            
+        
+            C++ signature :
+                void clear_cache()
+    
+    ffoorrwwaarrdd__(...)
+        forward_( (Coord)arg1, (Projection)arg2) -> Coord :
+        
+            C++ signature :
+                mapnik::coord<double, 2> forward_(mapnik::coord<double, 2>,mapnik::projection)
+        
+        forward_( (Box2d)arg1, (Projection)arg2) -> Box2d :
+        
+            C++ signature :
+                mapnik::box2d<double> forward_(mapnik::box2d<double>,mapnik::projection)
+    
+    hhaass__ccaaiirroo(...)
+        has_cairo() -> bool :
+            Get cairo library status
+        
+            C++ signature :
+                bool has_cairo()
+    
+    hhaass__ggrriidd__rreennddeerreerr(...)
+        has_grid_renderer() -> bool :
+            Get grid_renderer status
+        
+            C++ signature :
+                bool has_grid_renderer()
+    
+    hhaass__jjppeegg(...)
+        has_jpeg() -> bool :
+            Get jpeg read/write support status
+        
+            C++ signature :
+                bool has_jpeg()
+    
+    hhaass__ppnngg(...)
+        has_png() -> bool :
+            Get png read/write support status
+        
+            C++ signature :
+                bool has_png()
+    
+    hhaass__pprroojj44(...)
+        has_proj4() -> bool :
+            Get proj4 status
+        
+            C++ signature :
+                bool has_proj4()
+    
+    hhaass__ppyyccaaiirroo(...)
+        has_pycairo() -> bool :
+            Get pycairo module status
+        
+            C++ signature :
+                bool has_pycairo()
+    
+    hhaass__ssvvgg__rreennddeerreerr(...)
+        has_svg_renderer() -> bool :
+            Get svg_renderer status
+        
+            C++ signature :
+                bool has_svg_renderer()
+    
+    hhaass__ttiiffff(...)
+        has_tiff() -> bool :
+            Get tiff read/write support status
+        
+            C++ signature :
+                bool has_tiff()
+    
+    hhaass__wweebbpp(...)
+        has_webp() -> bool :
+            Get webp read/write support status
+        
+            C++ signature :
+                bool has_webp()
+    
+    iinnvveerrssee__(...)
+        inverse_( (Coord)arg1, (Projection)arg2) -> Coord :
+        
+            C++ signature :
+                mapnik::coord<double, 2> inverse_(mapnik::coord<double, 2>,mapnik::projection)
+        
+        inverse_( (Box2d)arg1, (Projection)arg2) -> Box2d :
+        
+            C++ signature :
+                mapnik::box2d<double> inverse_(mapnik::box2d<double>,mapnik::projection)
+    
+    llooaadd__mmaapp(...)
+        load_map( (Map)arg1, (str)arg2 [, (bool)arg3 [, (str)arg4]]) -> None :
+        
+            C++ signature :
+                void load_map(mapnik::Map {lvalue},std::string [,bool [,std::string]])
+    
+    llooaadd__mmaapp__ffrroomm__ssttrriinngg(...)
+        load_map_from_string( (Map)arg1, (str)arg2 [, (bool)arg3 [, (str)arg4]]) -> None :
+        
+            C++ signature :
+                void load_map_from_string(mapnik::Map {lvalue},std::string [,bool [,std::string]])
+    
+    mmaappnniikk__vveerrssiioonn(...)
+        mapnik_version() -> int :
+            Get the Mapnik version number
+        
+            C++ signature :
+                unsigned int mapnik_version()
+    
+    mmaappnniikk__vveerrssiioonn__ffrroomm__ssttrriinngg(version_string)
+        Return the Mapnik version from a string.
+    
+    mmaappnniikk__vveerrssiioonn__ssttrriinngg(...)
+        mapnik_version_string() -> str :
+            Get the Mapnik version string
+        
+            C++ signature :
+                std::string mapnik_version_string()
+    
+    rreeggiisstteerr__ffoonnttss(path=None, valid_extensions=['.ttf', '.otf', '.ttc', '.pfa', '.pfb', '.ttc', '.dfont', '.woff'])
+        Recursively register fonts using path argument as base directory
+    
+    rreeggiisstteerr__pplluuggiinnss(path=None)
+        Register plugins located by specified path
+    
+    rreennddeerr(...)
+        render( (Map)arg1, (Image)arg2 [, (float)arg3 [, (int)arg4 [, (int)arg5]]]) -> None :
+            
+            Render Map to an AGG image_any using offsets
+            
+            Usage:
+            >>> from mapnik import Map, Image, render, load_map
+            >>> m = Map(256,256)
+            >>> load_map(m,'mapfile.xml')
+            >>> im = Image(m.width,m.height)
+            >>> scale_factor=2.0
+            >>> offset = [100,50]
+            >>> render(m,im)
+            >>> render(m,im,scale_factor)
+            >>> render(m,im,scale_factor,offset[0],offset[1])
+            
+            
+        
+            C++ signature :
+                void render(mapnik::Map,mapnik::image_any {lvalue} [,double [,unsigned int [,unsigned int]]])
+    
+    rreennddeerr__llaayyeerr(...)
+        render_layer( (Map)map, (Image)image, (int)layer [, (float)scale_factor=1.0 [, (int)offset_x=0 [, (int)offset_y=0]]]) -> None :
+        
+            C++ signature :
+                void render_layer(mapnik::Map,mapnik::image_any {lvalue},unsigned int [,double=1.0 [,unsigned int=0 [,unsigned int=0]]])
+        
+        render_layer( (Map)map, (Grid)grid, (int)layer [, (list)fields=[] [, (float)scale_factor=1.0 [, (int)offset_x=0 [, (int)offset_y=0]]]]) -> None :
+        
+            C++ signature :
+                void render_layer(mapnik::Map,mapnik::hit_grid<mapnik::gray64s_t> {lvalue},unsigned int [,boost::python::list=[] [,double=1.0 [,unsigned int=0 [,unsigned int=0]]]])
+    
+    rreennddeerr__ttiillee__ttoo__ffiillee(...)
+        render_tile_to_file( (Map)arg1, (int)arg2, (int)arg3, (int)arg4, (int)arg5, (str)arg6, (str)arg7) -> None :
+            
+            TODO
+            
+            
+        
+            C++ signature :
+                void render_tile_to_file(mapnik::Map,unsigned int,unsigned int,unsigned int,unsigned int,std::string,std::string)
+    
+    rreennddeerr__ttoo__ffiillee(...)
+        render_to_file( (Map)arg1, (str)arg2, (str)arg3) -> None :
+            
+            Render Map to file using explicit image type.
+            
+            Usage:
+            >>> from mapnik import Map, render_to_file, load_map
+            >>> m = Map(256,256)
+            >>> load_map(m,'mapfile.xml')
+            >>> render_to_file(m,'image32bit.png','png')
+            
+            8 bit (paletted) PNG can be requested with 'png256':
+            >>> render_to_file(m,'8bit_image.png','png256')
+            
+            JPEG quality can be controlled by adding a suffix to
+            'jpeg' between 0 and 100 (default is 85):
+            >>> render_to_file(m,'top_quality.jpeg','jpeg100')
+            >>> render_to_file(m,'medium_quality.jpeg','jpeg50')
+            
+        
+            C++ signature :
+                void render_to_file(mapnik::Map,std::string,std::string)
+        
+        render_to_file( (Map)arg1, (str)arg2) -> None :
+            
+            Render Map to file (type taken from file extension)
+            
+            Usage:
+            >>> from mapnik import Map, render_to_file, load_map
+            >>> m = Map(256,256)
+            >>> render_to_file(m,'image.jpeg')
+            
+            
+        
+            C++ signature :
+                void render_to_file(mapnik::Map,std::string)
+        
+        render_to_file( (Map)arg1, (str)arg2, (str)arg3, (float)arg4) -> None :
+            
+            Render Map to file using explicit image type and scale factor.
+            
+            Usage:
+            >>> from mapnik import Map, render_to_file, load_map
+            >>> m = Map(256,256)
+            >>> scale_factor = 4
+            >>> render_to_file(m,'image.jpeg',scale_factor)
+            
+            
+        
+            C++ signature :
+                void render_to_file(mapnik::Map,std::string,std::string,double)
+    
+    rreennddeerr__wwiitthh__ddeetteeccttoorr(...)
+        render_with_detector( (Map)arg1, (Image)arg2, (LabelCollisionDetector)arg3 [, (float)arg4 [, (int)arg5 [, (int)arg6]]]) -> None :
+            
+            Render Map to an AGG image_any using a pre-constructed detector.
+            
+            Usage:
+            >>> from mapnik import Map, Image, LabelCollisionDetector, render_with_detector, load_map
+            >>> m = Map(256,256)
+            >>> load_map(m,'mapfile.xml')
+            >>> im = Image(m.width,m.height)
+            >>> detector = LabelCollisionDetector(m)
+            >>> render_with_detector(m, im, detector)
+            
+        
+            C++ signature :
+                void render_with_detector(mapnik::Map,mapnik::image_any {lvalue},std::shared_ptr<mapnik::label_collision_detector4> [,double [,unsigned int [,unsigned int]]])
+    
+    rreennddeerr__wwiitthh__vvaarrss(...)
+        render_with_vars( (Map)map, (Image)image, (dict)vars [, (float)scale_factor=1.0 [, (int)offset_x=0 [, (int)offset_y=0]]]) -> None :
+        
+            C++ signature :
+                void render_with_vars(mapnik::Map,mapnik::image_any {lvalue},boost::python::dict [,double=1.0 [,unsigned int=0 [,unsigned int=0]]])
+    
+    ssaavvee__mmaapp(...)
+        save_map( (Map)arg1, (str)arg2 [, (bool)arg3]) -> None :
+        
+            C++ signature :
+                void save_map(mapnik::Map,std::string [,bool])
+    
+    ssaavvee__mmaapp__ttoo__ssttrriinngg(...)
+        save_map_to_string( (Map)arg1 [, (bool)arg2]) -> str :
+        
+            C++ signature :
+                std::string save_map_to_string(mapnik::Map [,bool])
+    
+    ssccaallee__ddeennoommiinnaattoorr(...)
+        scale_denominator( (Map)map, (bool)is_geographic) -> float :
+            
+            Return the Map Scale Denominator.
+            Also available as Map.scale_denominator()
+            
+            Usage:
+            
+            >>> from mapnik import Map, Projection, scale_denominator, load_map
+            >>> m = Map(256,256)
+            >>> load_map(m,'mapfile.xml')
+            >>> scale_denominator(m,Projection(m.srs).geographic)
+            
+            
+        
+            C++ signature :
+                double scale_denominator(mapnik::Map,bool)
+
+DDAATTAA
+    CCOOLLOORRIIZZEERR__DDIISSCCRREETTEE = mapnik._mapnik.ColorizerMode.COLORIZER_DISCRETE
+    CCOOLLOORRIIZZEERR__EEXXAACCTT = mapnik._mapnik.ColorizerMode.COLORIZER_EXACT
+    CCOOLLOORRIIZZEERR__IINNHHEERRIITT = mapnik._mapnik.ColorizerMode.COLORIZER_INHERIT
+    CCOOLLOORRIIZZEERR__LLIINNEEAARR = mapnik._mapnik.ColorizerMode.COLORIZER_LINEAR
+
