@@ -7,7 +7,7 @@ from sys import exc_info
 from StringIO import StringIO
 from xml.etree import ElementTree
 from traceback import format_exception, format_exception_only
-
+# 本句???
 from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, Coord, mapnik_version
 
 try:
@@ -278,6 +278,7 @@ class CRSFactory:
         else:
             raise OGCException('Invalid CRS Namespace: %s' % crsparts[0], 'InvalidCRS')
 
+# 
 def copy_layer(obj):
     lyr = Layer(obj.name)
     if hasattr(obj, 'title'):
@@ -566,6 +567,7 @@ class BaseExceptionHandler:
         fh.seek(0)
         return Response(params['format'].replace('8',''), fh.read(), status_code=404)
 
+# 定义从MapnikProjection继承的类Projection
 class Projection(MapnikProjection):
     
     def epsgstring(self):
