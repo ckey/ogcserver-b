@@ -7,9 +7,11 @@ from sys import exc_info
 from StringIO import StringIO
 from xml.etree import ElementTree
 from traceback import format_exception, format_exception_only
-# 本句???
+# 本句从mapnik导入Map, Color, Envelope, render, Image, Layer, Style, Projection,Coord, mapnik_version
+# 
+# 切将Projection重命名为MapnikProjection
 from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, Coord, mapnik_version
-
+# 差错处理方案
 try:
     from PIL.Image import new
     from PIL.ImageDraw import Draw
@@ -278,9 +280,12 @@ class CRSFactory:
         else:
             raise OGCException('Invalid CRS Namespace: %s' % crsparts[0], 'InvalidCRS')
 
+# 拷贝图层
 # 
+# 从此处可以获知layer有哪些参数
 def copy_layer(obj):
     lyr = Layer(obj.name)
+    # 确定obj是否有title属性,返回bool值
     if hasattr(obj, 'title'):
         lyr.title = obj.title
     else:
@@ -569,7 +574,9 @@ class BaseExceptionHandler:
 
 # 定义从MapnikProjection继承的类Projection
 class Projection(MapnikProjection):
-    
+    # 定义方法
+    # 
+    # 将本对象的params()返回值依据"="分割,并将所得list的第二个元素以大写形式返回
     def epsgstring(self):
         return self.params().split('=')[1].upper()
 

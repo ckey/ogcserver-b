@@ -10,6 +10,7 @@ from ogcserver.wms111 import ServiceHandler as ServiceHandler111
 from ogcserver.wms130 import ServiceHandler as ServiceHandler130
 from ogcserver.exceptions import OGCException, ServerConfigurationError
 
+# ServiceHandlerFactory服务处理器参数
 def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
 
     if not version:
@@ -20,6 +21,7 @@ def ServiceHandlerFactory(conf, mapfactory, onlineresource, version):
         return ServiceHandler130(conf, mapfactory, onlineresource)
     else:
         return ServiceHandler111(conf, mapfactory, onlineresource)
+
 # named_rules 提取，输入为style类对象或list，输出为style对象
 def extract_named_rules(s_obj):
     s = Style()
@@ -43,6 +45,11 @@ def extract_named_rules(s_obj):
     #当提取数据不为空时，返回s
     if len(s.rules):
         return s
+# 定义类BaseWMSFactory
+# 
+# 描述基本的wms参数
+# 
+# 待添加更具体描述
 
 class BaseWMSFactory:
     def __init__(self, configpath=None):
