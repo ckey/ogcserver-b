@@ -14,7 +14,7 @@ import mapnik
 
 from ogcserver.common import Version
 from ogcserver.WMS import BaseWMSFactory
-#从ogcserver.configparser导入自定义的SafeConfigParser类
+# 从ogcserver.configparser导入自定义的SafeConfigParser类
 from ogcserver.configparser import SafeConfigParser
 from ogcserver.wms111 import ExceptionHandler as ExceptionHandler111
 from ogcserver.wms130 import ExceptionHandler as ExceptionHandler130
@@ -26,47 +26,60 @@ WSGI_STATUS = {
     500: '500 SERVER ERROR',
 }
 
+
 def do_import(module):
     """
     Makes setuptools namespaces work
     """
     moduleobj = None
-    exec 'import %s' % module 
+    exec 'import %s' % module
     exec 'moduleobj=%s' % module
     return moduleobj
- 
+
+
 class WSGIApp:
 
-#定义构造方法
-    def __init__(self, configpath, mapfile=None,fonts=None,home_html=None):
-##生成实例
+    # 定义构造方法
+    def __init__(self, configpath, mapfile=None, fonts=None, home_html=None):
+        # 实例化 ConfigParser 并加载配置文件
         conf = SafeConfigParser()
-        #从配置文件读取并分析（分列）配置信息
+        # 从配置文件读取并分析（分列）配置信息
         conf.readfp(open(configpath))
         # TODO - be able to supply in config as well
         self.home_html = home_html
         self.conf = conf
         if fonts:
-            #注册指定字体
+            # 注册指定字体
             mapnik.register_fonts(fonts)
         if mapfile:
-            #生成BaseWMSFactory实例
+            # 生成BaseWMSFactory实例
             wms_factory = BaseWMSFactory(configpath)
             # TODO - add support for Cascadenik MML
             wms_factory.loadXML(mapfile)
             wms_factory.finalize()
             self.mapfactory = wms_factory
         else:
+            # 阅读default.conf,有疑惑???
+            #
+            # 原default.conf文件中module未定义,需要使用要在default.conf中自行定义
             if not conf.has_option_with_value('server', 'module'):
-                raise ServerConfigurationError('The factory module is not defined in the configuration file.')
+                raise ServerConfigurationError(
+                    'The factory module is not defined in the configuration file.')
+            # 导入指定module
             try:
+                # get(section，option)，Get an option value for the named
+                # section.
                 mapfactorymodule = do_import(conf.get('server', 'module'))
             except ImportError:
-                raise ServerConfigurationError('The factory module could not be loaded.')
+                raise ServerConfigurationError(
+                    'The factory module could not be loaded.')
             if hasattr(mapfactorymodule, 'WMSFactory'):
+                # Get a named attribute from an object; getattr(x, 'y') is
+                # equivalent to x.y.
                 self.mapfactory = getattr(mapfactorymodule, 'WMSFactory')()
             else:
-                raise ServerConfigurationError('The factory module does not have a WMSFactory class.')
+                raise ServerConfigurationError(
+                    'The factory module does not have a WMSFactory class.')
         if conf.has_option('server', 'debug'):
             self.debug = int(conf.get('server', 'debug'))
         else:
@@ -75,20 +88,32 @@ class WSGIApp:
             self.max_age = 'max-age=%d' % self.conf.get('server', 'maxage')
         else:
             self.max_age = None
+# 将一个类实例变成一个可调用对象
+#
+# 使用__call__
 
     def __call__(self, environ, start_response):
         reqparams = {}
         base = True
+        # parse_qs输入字符串,输出dict
+        #
+        # dict的.items()返回list
+        #
+        # 将*****添加到reqparams
         for key, value in parse_qs(environ['QUERY_STRING'], True).items():
             reqparams[key.lower()] = value[0]
             base = False
 
+        # 判断 ???
         if self.conf.has_option_with_value('service', 'baseurl'):
             onlineresource = '%s' % self.conf.get('service', 'baseurl')
         else:
-            # if there is no baseurl in the config file try to guess a valid one
-            onlineresource = 'http://%s%s%s?' % (environ['HTTP_HOST'], environ['SCRIPT_NAME'], environ['PATH_INFO'])
+            # if there is no baseurl in the config file try to guess a valid
+            # one
+            onlineresource = 'http://%s%s%s?' % (environ['HTTP_HOST'], environ[
+                                                 'SCRIPT_NAME'], environ['PATH_INFO'])
 
+        # 解析url命令,并处理
         try:
             if not reqparams.has_key('request'):
                 raise OGCException('Missing request parameter.')
@@ -110,17 +135,21 @@ class WSGIApp:
                 ogcserver = do_import('ogcserver')
             except:
                 raise OGCException('Unsupported service "%s".' % service)
-            ServiceHandlerFactory = getattr(ogcserver, service).ServiceHandlerFactory
-            servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
+            ServiceHandlerFactory = getattr(
+                ogcserver, service).ServiceHandlerFactory
+            servicehandler = ServiceHandlerFactory(
+                self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
             if reqparams.has_key('version'):
                 del reqparams['version']
             if request not in servicehandler.SERVICE_PARAMS.keys():
-                raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
+                raise OGCException('Operation "%s" not supported.' %
+                                   request, 'OperationNotSupported')
             ogcparams = servicehandler.processParameters(request, reqparams)
             try:
                 requesthandler = getattr(servicehandler, request)
             except:
-                raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
+                raise OGCException('Operation "%s" not supported.' %
+                                   request, 'OperationNotSupported')
 
             # stick the user agent in the request params
             # so that we can add ugly hacks for specific buggy clients
@@ -134,11 +163,12 @@ class WSGIApp:
             else:
                 version = Version(version)
             if version >= '1.3.0':
-                eh = ExceptionHandler130(self.debug,base,self.home_html)
+                eh = ExceptionHandler130(self.debug, base, self.home_html)
             else:
-                eh = ExceptionHandler111(self.debug,base,self.home_html)
+                eh = ExceptionHandler111(self.debug, base, self.home_html)
             response = eh.getresponse(reqparams)
-        response_headers = [('Content-Type', response.content_type),('Content-Length', str(len(response.content)))]
+        response_headers = [('Content-Type', response.content_type),
+                            ('Content-Length', str(len(response.content)))]
         if self.max_age:
             response_headers.append(('Cache-Control', self.max_age))
         status = WSGI_STATUS.get(response.status_code, '500 SERVER ERROR')
@@ -149,12 +179,13 @@ class WSGIApp:
 #  PasteDeploy factories [kiorky kiorky@cryptelium.net]
 
 class BasePasteWSGIApp(WSGIApp):
+
     def __init__(self,
                  configpath,
                  fonts=None,
                  home_html=None,
                  **kwargs
-                ):
+                 ):
         conf = SafeConfigParser()
         conf.readfp(open(configpath))
         # TODO - be able to supply in config as well
@@ -167,49 +198,57 @@ class BasePasteWSGIApp(WSGIApp):
         else:
             self.debug = False
         if self.debug:
-            self.debug=1
+            self.debug = 1
         else:
-            self.debug=0
+            self.debug = 0
         if 'maxage' in kwargs:
             self.max_age = 'max-age=%d' % kwargs.get('maxage')
         else:
             self.max_age = None
 
+
 class MapFilePasteWSGIApp(BasePasteWSGIApp):
+
     def __init__(self,
                  configpath,
                  mapfile,
                  fonts=None,
                  home_html=None,
                  **kwargs
-                ):
-        BasePasteWSGIApp.__init__(self, 
-                                  configpath, 
+                 ):
+        BasePasteWSGIApp.__init__(self,
+                                  configpath,
                                   font=fonts, home_html=home_html, **kwargs)
         wms_factory = BaseWMSFactory(configpath)
         wms_factory.loadXML(mapfile)
         wms_factory.finalize()
         self.mapfactory = wms_factory
 
+
 class WMSFactoryPasteWSGIApp(BasePasteWSGIApp):
+
     def __init__(self,
                  configpath,
                  server_module,
                  fonts=None,
                  home_html=None,
                  **kwargs
-                ):
-        BasePasteWSGIApp.__init__(self, 
-                                  configpath, 
+                 ):
+        BasePasteWSGIApp.__init__(self,
+                                  configpath,
                                   font=fonts, home_html=home_html, **kwargs)
         try:
             mapfactorymodule = do_import(server_module)
         except ImportError:
-            raise ServerConfigurationError('The factory module could not be loaded.')
+            raise ServerConfigurationError(
+                'The factory module could not be loaded.')
         if hasattr(mapfactorymodule, 'WMSFactory'):
-            self.mapfactory = getattr(mapfactorymodule, 'WMSFactory')(configpath)
+            self.mapfactory = getattr(
+                mapfactorymodule, 'WMSFactory')(configpath)
         else:
-            raise ServerConfigurationError('The factory module does not have a WMSFactory class.')
+            raise ServerConfigurationError(
+                'The factory module does not have a WMSFactory class.')
+
 
 def ogcserver_base_factory(base, global_config, **local_config):
     """
@@ -221,10 +260,10 @@ def ogcserver_base_factory(base, global_config, **local_config):
     debug = False
     if global_config.get('debug', 'False').lower() == 'true':
         debug = True
-    configpath =  wconf['ogcserver_config']
-    server_module =     wconf.get('mapfile', None)
-    fonts =       wconf.get('fonts', None)
-    home_html =   wconf.get('home_html', None)
+    configpath = wconf['ogcserver_config']
+    server_module = wconf.get('mapfile', None)
+    fonts = wconf.get('fonts', None)
+    home_html = wconf.get('home_html', None)
     app = None
     if base == MapFilePasteWSGIApp:
         mapfile = wconf['mapfile']
@@ -240,6 +279,7 @@ def ogcserver_base_factory(base, global_config, **local_config):
                    fonts=fonts,
                    home_html=home_html,
                    debug=False)
+
     def ogcserver_app(environ, start_response):
         from webob import Request
         req = Request(environ)
@@ -256,13 +296,14 @@ def ogcserver_base_factory(base, global_config, **local_config):
                 raise
     return ogcserver_app
 
+
 def ogcserver_map_factory(global_config, **local_config):
     return ogcserver_base_factory(MapFilePasteWSGIApp,
                                   global_config,
                                   **local_config)
 
+
 def ogcserver_wms_factory(global_config, **local_config):
     return ogcserver_base_factory(WMSFactoryPasteWSGIApp,
                                   global_config,
                                   **local_config)
-

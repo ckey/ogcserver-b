@@ -1,0 +1,82 @@
+.
+├── AUTHORS.txt
+├── bin
+│   ├── ogcserver
+│   └── ogcserver~
+├── CHANGELOG.md
+├── conf
+│   ├── fcgi_app.py
+│   └── map_factory.py
+├── demo
+│   ├── China.xml
+│   ├── map.xml
+│   ├── openlayers.html
+│   ├── world_merc.dbf
+│   ├── world_merc.index
+│   ├── world_merc.json
+│   ├── world_merc_license.txt
+│   ├── world_merc.prj
+│   ├── world_merc.shp
+│   └── world_merc.shx
+├── docs
+│   ├── 02-017r1_Web_Map_Service_Implementation_Specification_-_Part_2_XML_for_Requests_using_HTTP_POST.pdf
+│   ├── 06-042_OpenGIS_Web_Map_Service_WMS_Implementation_Specification.pdf
+│   ├── CentOS 搭建OGCServer地图服务器说明.docx
+│   ├── GetCapabilities 响应.pdf
+│   ├── GetCapabilities 请求1.1.1.pdf
+│   ├── GetFeatureInfo 请求.pdf
+│   ├── Getmap 请求1.1.1.pdf
+│   ├── GetMap 请求.pdf
+│   ├── mapnik2.gif
+│   ├── mapnik.gif
+│   ├── mapnik_help
+│   ├── mapnik字体
+│   │   ├── unifont.tty
+│   │   └── 关于使用mapnik时字体问题说明.txt
+│   ├── OGCServer.png
+│   ├── OGCServer.xmind
+│   ├── OGCServer支持URL及后续思路分析.docx
+│   ├── OGCServer目录.png
+│   ├── overview.txt
+│   ├── readme.txt
+│   ├── 图片格式测试.jpg
+│   └── 图片格式测试.png
+├── LICENSE.txt
+├── MANIFEST.in
+├── ogcserver
+│   ├── cgiserver.py
+│   ├── common.py
+│   ├── configparser.py
+│   ├── default.conf
+│   ├── exceptions.py
+│   ├── __init__.py
+│   ├── modserver.py
+│   ├── wms111.py
+│   ├── wms130.py
+│   ├── WMS.py
+│   └── wsgi.py
+├── README.md
+├── setup.py
+├── tests
+│   ├── empty.dbf
+│   ├── empty.shp
+│   ├── map_factory.py
+│   ├── mapfile_background-color.xml
+│   ├── mapfile_encoding.xml
+│   ├── mapfile_styles.xml
+│   ├── ogcserver.conf
+│   ├── shape_encoding.xml
+│   ├── shape_iso8859-1_col.dbf
+│   ├── shape_iso8859-1_col.shp
+│   ├── shape_iso8859-1_col.shx
+│   ├── shape_iso8859-1_col.zip
+│   ├── testGetCapabilities.py
+│   ├── testGetFeatureinfo.py
+│   ├── testGetMap.py
+│   ├── testLayerStyles.py
+│   ├── testLoadMapFail.py
+│   ├── testLoadMapFromString.py
+│   └── testWsgi.py
+└── tree.txt
+
+7 directories, 72 files
